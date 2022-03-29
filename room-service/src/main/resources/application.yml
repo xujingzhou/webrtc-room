@@ -1,0 +1,24 @@
+SERVICE_NAME: room-service
+
+spring:
+  profiles:
+    active: local
+  mvc:
+    throw-exception-if-no-handler-found: true
+#    static-path-pattern: /static/**
+  resources:
+    add-mappings: true
+  application:
+    name: ${SERVICE_NAME}
+  thymeleaf:
+    servlet:
+      content-type: text/html
+    mode: HTML
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+server:
+    context-path: /${SERVICE_NAME}
+
+

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>healthcare test</title>
+    <link rel="shortcut icon" href="#"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        #console {
+            height: 450px;
+            overflow: auto;
+        }
+        .username-msg {
+            color: orange;
+        }
+        .connect-msg {
+            color: green;
+        }
+        .disconnect-msg {
+            color: red;
+        }
+    </style>
+</head>
+ 
+<body>
+    <h2>TEST</h2>
+    <div style="border: 1px;"> 
+    <label>socketurl: </label><input type="text" id="url" value="http://localhost:9660">
+    <br>
+    <label>userId: </label><input type="text" id="userId" value="123456">
+    <br>
+    <button id="connect">connect</button>
+    <button id="disconnect">disconnect</button>
+    
+</div>
+<br>
+<div style="border: 1px;">
+    <label>socketEvent: </label><input type="text" id="socketEvent" value="test-ack">
+    <br>
+    <label>content: </label><br><textarea  id="content" maxlength="1000" cols="30" rows="5"></textarea>
+    <br>
+    <button id="send">send</button>
+</div>
+<br>
+    <div id="console" class="well"></div>
+</body>
+<script type="text/javascript">
+    var socket;
+    var errorCount = 0;
+    var isConnected = false;
+    var maxError = 5;
+ 
+    function connect(url, userId) {
+        if(url==''||url== null||url==undefined){
+//			url = 'http://localhost:9660/';
+			url = 'https://webrtc.dten.com:9660/';
+        }
+
+        if(userId==''||userId==null||userId==undefined){
+            userId = '7729';
+        }
+
+		// namespace = '/v1/healthcare';
+		// url += namespace;
+
+		var parameters = '';
+        parameters += 'userId=' + userId;
+		// var roomid = '123';
+        // parameters += '&sessionId=' + roomid;
+        // parameters += '&msgEvent=' + 'hello';
+		// var enableBroadcast = true;
+        // if (enableBroadcast) {
+        //     parameters += '&enableBroadcast=true';
+        //     parameters += '&maxRelayCountPerUser=' +  2;
+        // }
+		// var extra = {};
+		// var broadcastId;
+		// extra.broadcastId = roomid
+        // parameters += '&extra=' + JSON.stringify(extra || {});
+        var opts = {
+            path: '',
+            transports: ['websocket', 'xhr-polling', 'jsonp-polling'],
+            query: parameters,
+        };
+        socket = io.connect(url, opts);
+		
+		socket.userid = userId;
+		
+        socket.on('connect', function () {
+            isConnected = true;
+            serverOutput('<span class="connect-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>connect</span>');
+            errorCount=0;
+        });
+		
+        socket.on('message', function (data) {
+            output('<span class="username-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>' + JSON.stringify(data) + ' </span>');
+            console.log(data);
+        });
+ 
+        socket.on('disconnect', function () {
+            isConnected = false;
+            serverOutput('<span class="disconnect-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>' + 'disconnect </span>');
+        });
+		
+        socket.on('connect_error', function(data){
+            serverOutput('<span class="disconnect-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>;' + 'connect_error-' + JSON.stringify(data) + ' </span>');
+            errorCount++;
+            if(errorCount>=maxError){
+                socket.disconnect();
+            }
+        });
+        socket.on('connect_timeout', function(data){
+            serverOutput('<span class="disconnect-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>' + 'connect_timeout-' + JSON.stringify(data) + ' </span>');
+            errorCount++;
+            if(errorCount>=maxError){
+                socket.disconnect();
+            }
+        });
+        socket.on('error', function(data){
+            serverOutput('<span class="disconnect-msg"><font color="blue">'+getNowTime()+'&nbsp;</font>' + 'error-' + JSON.stringify(data) + ' </span>');
+            errorCount++;
+            if(errorCount>=maxError){
+                socket.disconnect();
+            }
+        });
+		
+		socket.on('userid-already-taken', function(useridAlreadyTaken, yourNewUserId) {
+			socket.close();
+            console.log("userid-already-taken: " + useridAlreadyTaken);
+        });
+		
+				
+		socket.on('test', function(data) {
+            console.log("test response: " + JSON.stringify(data));
+        });
+
+        // test ack from client to server
+        socket.on('test-ack', function(data, ackServerCallback) {
+            console.log("test-ack response: " + JSON.stringify(data));
+
+            // response ack to server
+            if (ackServerCallback) {
+                var response = 'message was delivered to client!';
+                console.log("test-ack response: " + response);
+                ackServerCallback(response);
+            }
+        });
+
+        // test ack from client to server
+        socket.on('test-voidack', function(data, ackServerCallback) {
+            console.log("test-voidack response: " + JSON.stringify(data));
+
+            // response ack to server
+            if (ackServerCallback) {
+                console.log("test-voidack response: message was delivered to client!");
+                ackServerCallback();
+            }
+        });
+    }
+    
+    function output(message) {
+        var element = $("<div>" + " " + message + "</div>");
+        $('#console').prepend(element);
+    }
+ 
+    function serverOutput(message) {
+        var element = $("<div>" + message + "</div>");
+        $('#console').prepend(element);
+    }
+   
+    $("#connect").click(function(){
+        if(!isConnected){
+        var url =  $("#url").val();
+        var userId = $("#userId").val();
+        connect(url,userId);
+    }
+    })
+    
+    $("#disconnect").click(function(){
+        if(isConnected){
+        socket.disconnect();
+        }
+    })
+
+    $("#send").click(function(){
+        var socketEvent =  $("#socketEvent").val();
+        var content  = $("#content").val();
+        serverOutput('<span class="connect-msg"><font color="blue">' + getNowTime() + '&nbsp;</font>' + content + ' </span>');
+		
+		var jsonObject = {"userId":"123", "remoteUserId":"456", "msgType":"test", "msgContent":content, "ts": 1558423624644};
+        socket.emit(socketEvent, JSON.stringify(jsonObject),
+			function(data) {  // process ack from server
+				console.log("ackRequest: " + JSON.stringify(data));
+        });
+    })
+	
+    function getNowTime(){
+        var date=new Date();   
+        var year=date.getFullYear();
+        var mon=date.getMonth()+1;  
+        var da=date.getDate(); 
+        var h=date.getHours(); 
+        var m=date.getMinutes(); 
+        var s=date.getSeconds(); 
+        var ms=date.getMilliseconds(); 
+        var d=document.getElementById('Date');    
+        var date =year+'/'+mon+'/'+da+' '+h+':'+m+':'+s+':'+ms;  
+        return date;
+    }
+</script>
+</html>

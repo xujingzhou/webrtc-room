@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="false" />
+        <setting name="useGeneratedKeys" value="true" />
+        <setting name="defaultExecutorType" value="REUSE" />
+    </settings>
+
+    <typeAliases>
+        <typeAlias alias="roomDo" type="com.dten.healthcare.room.bean.RoomDO"/>
+        <typeAlias alias="userDo" type="com.dten.healthcare.room.bean.UserDO"/>
+        <typeAlias alias="p2pUserDo" type="com.dten.healthcare.room.bean.P2PUserDO"/>
+        <typeAlias alias="streamDo" type="com.dten.healthcare.room.bean.TypeOfStreamsDO"/>
+        <typeAlias alias="extraDo" type="com.dten.healthcare.room.bean.ExtraDO"/>
+    </typeAliases>
+
+    <environments default="local">
+        <environment id="local">
+            <transactionManager type="jdbc"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/healthcare"/>
+                <property name="username" value="root"/>
+                <property name="password" value="112233"/>
+                <!-- 解决数据库检测到长时间不使用的连接，会自动断开连接而引起的错误提示-->
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+
+        <environment id="dev">
+            <transactionManager type="jdbc"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://${MYSQL-HOST}/${MYSQL-DB}?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;allowMultiQueries=true"/>
+                <property name="username" value="${MYSQL-USER}"/>
+                <property name="password" value="${MYSQL-PASSWD}"/>
+                <!-- 解决数据库检测到长时间不使用的连接，会自动断开连接而引起的错误提示-->
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+
+        <environment id="test">
+            <transactionManager type="jdbc"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://${MYSQL-HOST}/${MYSQL-DB}?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;allowMultiQueries=true"/>
+                <property name="username" value="${MYSQL-USER}"/>
+                <property name="password" value="${MYSQL-PASSWD}"/>
+                <!-- 解决数据库检测到长时间不使用的连接，会自动断开连接而引起的错误提示-->
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+
+        <environment id="stage">
+            <transactionManager type="jdbc"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://${MYSQL-HOST}/${MYSQL-DB}?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;allowMultiQueries=true"/>
+                <property name="username" value="${MYSQL-USER}"/>
+                <property name="password" value="${MYSQL-PASSWD}"/>
+                <!-- 解决数据库检测到长时间不使用的连接，会自动断开连接而引起的错误提示-->
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+
+        <environment id="usprod">
+            <transactionManager type="jdbc"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://${MYSQL-HOST}/${MYSQL-DB}?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;allowMultiQueries=true"/>
+                <property name="username" value="${MYSQL-USER}"/>
+                <property name="password" value="${MYSQL-PASSWD}"/>
+                <!-- 解决数据库检测到长时间不使用的连接，会自动断开连接而引起的错误提示-->
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+    </environments>
+
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="SQL Server" value="sqlserver"/>
+    </databaseIdProvider>
+
+    <mappers>
+        <mapper resource="mappers/roomMapper.xml"/>
+        <mapper resource="mappers/userMapper.xml"/>
+        <mapper resource="mappers/p2pUserMapper.xml"/>
+    </mappers>
+
+</configuration>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.7.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+	
+    <groupId>com.dten</groupId>
+    <artifactId>room</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+	<description>live streaming online of room</description>
+	
+    <modules>
+        <module>room-service</module>
+    </modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<spring-boot-maven-plugin.version>2.4.3</spring-boot-maven-plugin.version>
+		<flyway-maven-plugin.version>7.12.0</flyway-maven-plugin.version>
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+		<!-- 跳过测试 -->
+		<skipTests>true</skipTests>
+		<spring-boot.run.jvmArguments>-Duser.timezone=GMT+8</spring-boot.run.jvmArguments>
+
+		<spring-boot.version>2.4.4</spring-boot.version>
+		<spring-cloud-starter-openfeign.version>3.0.1</spring-cloud-starter-openfeign.version>
+		<spring.cloud.version>Hoxton.SR9</spring.cloud.version>
+		<spring-cloud-starter-loadbalancer.version>2.2.0.RELEASE</spring-cloud-starter-loadbalancer.version>
+
+		<swagger.version>2.9.2</swagger.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<log4j.version>1.2.17</log4j.version>
+		<logback.version>1.2.3</logback.version>
+		<fastjson.version>1.2.75</fastjson.version>
+		<javax.servlet.api.version>4.0.1</javax.servlet.api.version>
+		<commons.lang3.version>3.12.0</commons.lang3.version>
+		<jjwt.version>0.9.1</jjwt.version>
+		<java-jwt.version>3.9.0</java-jwt.version>
+		<netty-socketio.version>1.7.19</netty-socketio.version>
+		<hutool.version>5.5.9</hutool.version>
+		<joda-time.version>2.10.4</joda-time.version>
+		<mysql.version>5.1.49</mysql.version>
+		<spring.jdbc.version>5.3.9</spring.jdbc.version>
+		<mybatisPlus.version>3.4.1</mybatisPlus.version>
+		<druid.version>1.2.6</druid.version>
+		<flyway-core.version>5.2.4</flyway-core.version>
+		<jjwt.version>0.9.1</jjwt.version>
+		<jasypt-spring-boot.version>3.0.3</jasypt-spring-boot.version>
+		<httpclient.version>4.5</httpclient.version>
+		<shedlock.version>2.5.0</shedlock.version>
+		<commons-collections4.version>4.4</commons-collections4.version>
+	</properties>
+
+	<dependencies>
+		<!-- SpringBoot -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<version>${spring-boot.version}</version>
+			<exclusions>
+				<!-- 排除自带的logback依赖 -->
+<!--				<exclusion>-->
+<!--					<groupId>org.springframework.boot</groupId>-->
+<!--					<artifactId>spring-boot-starter-logging</artifactId>-->
+<!--				</exclusion>-->
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>${spring-boot.version}</version>
+			<exclusions>
+				<!-- 排除自带的logback依赖 -->
+<!--				<exclusion>-->
+<!--					<groupId>org.springframework.boot</groupId>-->
+<!--					<artifactId>spring-boot-starter-logging</artifactId>-->
+<!--				</exclusion>-->
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>${spring-boot.version}</version>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.cloud</groupId>-->
+<!--			<artifactId>spring-cloud-starter-openfeign</artifactId>-->
+<!--			<version>${spring-cloud-starter-openfeign.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-aop</artifactId>-->
+<!--			<version>${spring-boot.version}</version>-->
+<!--		</dependency>-->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+			<version>${spring-boot.version}</version>
+		</dependency>
+
+		<!-- 配置类自动装配 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+			<version>${spring-boot.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<version>${spring-boot.version}</version>
+		</dependency>
+
+		<!-- SpringRetry -->
+		<dependency>
+			<groupId>org.springframework.retry</groupId>
+			<artifactId>spring-retry</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+		</dependency>
+
+		<!-- thymeleaf依赖 -->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-thymeleaf</artifactId>-->
+<!--		</dependency>-->
+
+	</dependencies>
+
+	<!-- 配置多环境profile -->
+	<profiles>
+		<!-- 开发环境 -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<package.environment>dev</package.environment>
+			</properties>
+			<!-- 是否默认(true表示默认) -->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+
+		<!-- 测试环境 -->
+		<profile>
+			<id>test</id>
+			<properties>
+				<package.environment>test</package.environment>
+			</properties>
+		</profile>
+
+		<!-- stage环境 -->
+		<profile>
+			<id>stage</id>
+			<properties>
+				<package.environment>stage</package.environment>
+			</properties>
+		</profile>
+
+		<!-- 生产环境 -->
+		<profile>
+			<id>usprod</id>
+			<properties>
+				<package.environment>usprod</package.environment>
+			</properties>
+		</profile>
+	</profiles>
+
+<!--	<distributionManagement>-->
+<!--		<repository>-->
+<!--			<id>rdc-snapshots</id>-->
+<!--			<name>mirror</name>-->
+<!--			<url>https://repo.rdc.aliyun.com/repository/122474-snapshot-XWUbZX/</url>-->
+<!--		</repository>-->
+<!--	</distributionManagement>-->
+
+	<build>
+		<defaultGoal>compile</defaultGoal>
+		<!-- 文件名以及输出路径-->
+		<finalName>${project.artifactId}</finalName>
+<!--		<outputDirectory></outputDirectory>-->
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>application.yml</include>
+					<include>application-${package.environment}.yml</include>
+<!--					<include>**/*.xml</include>-->
+<!--					<include>**/*.properties</include>-->
+<!--					<include>*.jks</include>-->
+<!--					<include>*.p12</include>-->
+<!--					<include>static/*.*</include>-->
+					<include>**/*.*</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot-maven-plugin.version}</version>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+<!--			<plugin>-->
+<!--				<groupId>org.flywaydb</groupId>-->
+<!--				<artifactId>flyway-maven-plugin</artifactId>-->
+<!--			</plugin>-->
+
+			<!-- 跳过启动测试 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

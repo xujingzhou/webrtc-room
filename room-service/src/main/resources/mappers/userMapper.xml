@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* @Creator: Johnny Xu
+* @Date: 2021/7/30
+* @Description:
+-->
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dten.healthcare.room.mapper.UserMapper">
+
+    <resultMap id="extraMap" type="com.dten.healthcare.room.bean.ExtraDO" >
+        <result property="roomId" column="room_id" />
+        <result property="userId" column="user_id" />
+        <result property="broadcastId" column="broadcast_id" />
+        <result property="userFullName" column="user_fullName" />
+        <result property="roomOwner" column="room_owner" />
+    </resultMap>
+
+    <resultMap id="userMap" type="com.dten.healthcare.room.bean.UserDO">
+        <result property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="socketMessageEvent" column="socket_message_Event" />
+        <result property="socketCustomEvent" column="socket_custom_event" />
+        <result property="socketSessionId" column="session_id" />
+        <result property="client" column="socket" />
+        <result property="videoSourceType" column="video_source_type" />
+        <association property="extra" javaType="com.dten.healthcare.room.bean.ExtraDO" resultMap="extraMap"/>
+        <collection property="connectedWiths" ofType="String">
+            <id property="connectedWiths" column="connected_with" />
+        </collection>
+    </resultMap>
+
+    <select id="getUserByUserId" parameterType="String" resultMap="userMap">
+        SELECT
+            user.id,
+            user.user_id,
+            user.user_name,
+            user.socket_message_Event,
+            user.socket_custom_event,
+            user.session_id,
+            user.socket,
+            user.connected_with,
+            user.video_source_type,
+            extra.id,
+            extra.room_id,
+            extra.user_id,
+            extra.broadcast_id,
+            extra.user_fullName,
+            extra.room_owner
+        FROM rm_user user
+        LEFT JOIN rm_extra extra ON user.user_id = extra.user_id
+        WHERE user.user_id = #{userId}
+    </select>
+
+    <select id="getUserByConnectedWith" parameterType="String" resultType="com.dten.healthcare.room.bean.UserDO">
+        SELECT
+            id,
+            user_id
+            user_name,
+            socket_message_Event,
+            socket_custom_event,
+            session_id,
+            socket,
+            connected_with,
+            video_source_type
+        FROM rm_user
+        WHERE user_id = #{userId} AND connected_with = #{connectedWith}
+    </select>
+
+    <update id="update" parameterType="com.dten.healthcare.room.bean.UserDO">
+        <choose>
+            <when test="user.connectedWiths.size() > 0">
+                <foreach collection="user.connectedWiths" item="connectedWith" index = "index" separator=";">
+                    UPDATE rm_user as a,
+                    (SELECT
+                        id
+                    FROM rm_user
+                    WHERE user_id = #{user.userId} AND connected_with = #{connectedWith}) as b
+                    <trim prefix="set" suffixOverrides=",">
+                        <if test="user.userId != null">user_id=#{user.userId},</if>
+                        <if test="user.userName != null">user_name=#{user.userName},</if>
+                        <if test="user.socketMessageEvent != null">socket_message_Event=#{user.socketMessageEvent},</if>
+                        <if test="user.socketCustomEvent != null">socket_custom_event=#{user.socketCustomEvent},</if>
+                        <if test="user.socketSessionId != null">session_id=#{user.socketSessionId},</if>
+                        <if test="user.client != null">socket=#{user.client},</if>
+                        <if test="user.connectedWith != null">connected_with=#{user.connectedWith},</if>
+                        <if test="user.videoSourceType != null">video_source_type=#{user.videoSourceType},</if>
+                    </trim>
+                    WHERE a.id = b.id
+                </foreach>
+            </when>
+            <otherwise>
+                UPDATE rm_user
+                <trim prefix="set" suffixOverrides=",">
+                    <if test="user.userId != null">user_id=#{user.userId},</if>
+                    <if test="user.userName != null">user_name=#{user.userName},</if>
+                    <if test="user.socketMessageEvent != null">socket_message_Event=#{user.socketMessageEvent},</if>
+                    <if test="user.socketCustomEvent != null">socket_custom_event=#{user.socketCustomEvent},</if>
+                    <if test="user.socketSessionId != null">session_id=#{user.socketSessionId},</if>
+                    <if test="user.client != null">socket=#{user.client},</if>
+                    <if test="user.connectedWith != null">connected_with=#{user.connectedWith},</if>
+                    <if test="user.videoSourceType != null">video_source_type=#{user.videoSourceType},</if>
+                </trim>
+                WHERE user_id = #{user.userId}
+<!--                WHERE id = #{user.id}-->
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateUser" parameterType="com.dten.healthcare.room.bean.UserDO">
+        UPDATE rm_user as a,
+            (SELECT
+                id
+            FROM rm_user
+            WHERE user_id = #{user.userId} AND connected_with = #{connectedWith}) as b
+        <trim prefix="set" suffixOverrides=",">
+            <if test="user.userId != null">user_id=#{user.userId},</if>
+            <if test="user.userName != null">user_name=#{user.userName},</if>
+            <if test="user.socketMessageEvent != null">socket_message_Event=#{user.socketMessageEvent},</if>
+            <if test="user.socketCustomEvent != null">socket_custom_event=#{user.socketCustomEvent},</if>
+            <if test="user.socketSessionId != null">session_id=#{user.socketSessionId},</if>
+            <if test="user.client != null">socket=#{user.client},</if>
+            <if test="user.connectedWith != null">connected_with=#{user.connectedWith},</if>
+            <if test="user.videoSourceType != null">video_source_type=#{user.videoSourceType},</if>
+        </trim>
+        WHERE a.id = b.id
+    </update>
+
+    <update id="updateExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        UPDATE rm_extra
+            <trim prefix="set" suffixOverrides=",">
+                <if test="extra.roomId != null">room_id=#{extra.roomId},</if>
+                <if test="extra.userId != null">user_id=#{extra.userId},</if>
+                <if test="extra.broadcastId != null">broadcast_id=#{extra.broadcastId},</if>
+                <if test="extra.userFullName != null">user_fullName=#{extra.userFullName},</if>
+                room_owner=#{extra.roomOwner},
+            </trim>
+        WHERE user_id = #{extra.userId}
+    </update>
+
+    <insert id="insertUser" parameterType="com.dten.healthcare.room.bean.UserDO">
+        INSERT INTO
+            rm_user(user_id, user_name, socket_message_Event, socket_custom_event, session_id, socket, connected_with, video_source_type)
+        VALUES
+            <foreach collection="user.connectedWiths" item="connectedWith" separator=",">
+                ( #{user.userId}, #{user.userName}, #{user.socketMessageEvent},
+                #{user.socketCustomEvent}, #{user.socketSessionId}, #{user.client}, #{connectedWith}, #{user.videoSourceType} )
+            </foreach>
+    </insert>
+
+    <insert id="insertExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        INSERT INTO
+            rm_extra(room_id, user_id, broadcast_id, user_fullName, room_owner)
+        VALUES
+            ( #{extra.roomId}, #{extra.userId}, #{extra.broadcastId},
+            #{extra.userFullName}, #{extra.roomOwner} )
+    </insert>
+
+    <insert id="insertOrUpdateUser" parameterType="com.dten.healthcare.room.bean.UserDO">
+        REPLACE INTO
+            rm_user(user_id, user_name, socket_message_Event, socket_custom_event, session_id, socket, connected_with, video_source_type)
+        VALUES
+            <foreach collection="user.connectedWiths" item="connectedWith" separator=",">
+                ( #{user.userId}, #{user.userName}, #{user.socketMessageEvent},
+                #{user.socketCustomEvent}, #{user.socketSessionId}, #{user.client}, #{connectedWith}, #{user.videoSourceType} )
+            </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        REPLACE INTO
+            rm_extra(room_id, user_id, broadcast_id, user_fullName, room_owner)
+        VALUES
+            ( #{extra.roomId}, #{extra.userId}, #{extra.broadcastId},
+            #{extra.userFullName}, #{extra.roomOwner} )
+    </insert>
+
+    <delete id="deleteByUserId" parameterType="String">
+        DELETE
+            user, extra
+        FROM rm_user user
+        LEFT JOIN rm_extra extra ON user.user_id = extra.user_id
+        WHERE user.user_id = #{userId}
+    </delete>
+
+</mapper>

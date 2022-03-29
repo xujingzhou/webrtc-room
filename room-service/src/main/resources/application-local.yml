@@ -1,0 +1,215 @@
+spring:
+  # 控制带颜色输出开关
+  output:
+    ansi:
+      enabled: always
+
+  flyway:
+    encoding: UTF-8
+    baseline-on-migrate: true
+    cleanDisabled: true
+    enabled: true
+    sql-migration-prefix: V
+    locations: classpath:db/migration
+    outOfOrder: true
+
+  # 接口超时时间
+  mvc:
+    async:
+      request-timeout: 20000
+
+  # 缓存配置
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache.xml
+
+  datasource:
+    #  注意：如果使用HTTPS需要证书的话，请置verifyServerCertificate=true&useSSL=true
+    url: jdbc:mysql://localhost:3306/healthcare_room_local?useUnicode=true&characterEncoding=utf8&useSSL=false&verifyServerCertificate=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&allowMultiQueries=true
+    username: root
+    password: 112233
+    driver-class-name: com.mysql.jdbc.Driver
+
+    #----------------druid数据源配置-----------------------
+    druid:
+      initialSize: 10
+      minIdle: 10
+      maxActive: 30
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      poolPreparedStatements: true
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+      #filters: stat,wall,log4j
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      # 合并多个DruidDataSource的监控数据
+      useGlobalDataSourceStat: true
+
+      # WebStatFilter监控配置
+      web-stat-filter:
+        enabled: true
+        # 添加过滤规则：那些访问拦截统计
+        url-pattern: /*
+        # 忽略过滤的格式：哪些不拦截，不统计
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+
+      # StatViewServlet配置（Druid监控后台的Servlet映射配置，因为SpringBoot项目没有web.xml所在在这里使用配置文件设置）
+      stat-view-servlet:
+        enabled: true
+        # 配置Servlet的访问路径：访问路径为/druid/**时，跳转到StatViewServlet，会自动转到Druid监控后台
+        url-pattern: /druid/*
+        # 是否能够重置数据
+        reset-enable: false
+        # 设置监控后台的访问账户及密码
+        login-username: admin
+        login-password: 123456
+        # IP白名单：允许哪些主机访问，默认为“”任何主机
+        # allow: 127.0.0.1
+        # IP黑名单：禁止IP访问，（共同存在时，deny优先于allow）
+        # deny: 192.168.1.218
+
+      # 配置StatFilter
+      filter:
+        stat:
+          log-slow-sql: true
+
+#----------------mybatis plus配置-----------------------
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔(告诉 Mapper 所对应的 XML 文件位置)
+  mapper-locations: classpath:mappers/*.xml
+  type-enums-package: com.demo.mybatisplus.constant
+  configuration:
+    # 枚举类型默认保存int型
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+    # 是否开启自动驼峰命名规则映射:从数据库列名到Java属性驼峰命名的类似映射
+    map-underscore-to-camel-case: false
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    call-setters-on-nulls: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # 实体扫描，多个package用逗号或者分号分隔（这里更改为你的实体类存放路径）
+  typeAliasesPackage: com.dten.healthcare.room.bean
+  global-config:
+    db-config:
+      #主键类型 AUTO:"数据库ID自增" INPUT:"用户输入ID",ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: auto
+      #字段策略 IGNORED:"忽略判断"  NOT_NULL:"非 NULL 判断")  NOT_EMPTY:"非空判断"
+      field-strategy: NOT_EMPTY
+      #数据库类型
+      db-type: MYSQL
+      # 逻辑删除配置
+      # 删除前
+      logic-not-delete-value: 1
+      # 删除后
+      logic-delete-value: 0
+
+  #----------------静态资源配置-----------------------
+  #打war时指定静态文件，没有效果
+#  resources:
+#    static-locations: /static/,/public/
+#  mvc:
+#    static-path-pattern: #静态资源映射路径
+
+#  jackson:
+#    不返回NULL值字段
+#    default-property-inclusion: non_null
+#    date-format: yyyy-MM-dd
+#    time-zone: GMT+8
+
+#----------------druid数据源配置-----------------------
+
+#----------------swagger配置-----------------------
+swagger:
+  #生产环境改为false（改为false后swagger-ui.html则无法访问）
+  enable: true
+
+#解决Swagger2 异常 NumberFormatException:For input string:""
+logging:
+  # 控制台带颜色输出
+  pattern:
+    level:
+    file:
+    console: '%clr(%d{HH:mm:ss}){yellow} [%clr(%thread){red}] %-5level --- %clr(%logger){green} | %msg%n'
+  # swagger2
+  level:
+    com.dten.healthcare.room.Mapper: debug
+    io:
+      swagger:
+        models:
+          parameters:
+            AbstractSerializableParameter: ERROR
+    org:
+      springframework:
+        boot:
+          autoconfigure:
+            logging: info
+
+jwt:
+  # 私钥
+  secret: AkAU40VUoBsMbcs0EeYFwp3W2iDEFZLySrtd
+  api-key: rEIat0otOwFFWIU9g0eTrHkS3WFSNAeqaO3D
+  # 过期时间，单位秒
+  expire: 3000
+  # 需要认证的url，多个URL使用英文逗号,分割
+  authorised-urls: /room-service/**
+
+# restTemplate超时设置
+rest:
+  template:
+    conn:
+      connect-timeout: 6000
+      read-timeout: 6000
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+    max-connections: 1000 # 瞬间最大支持的并发的连接数
+    accept-count: 200 # 等待队列长度
+    max-http-header-size: 8192
+  port: 8091 # https端口号
+  connection-timeout: 15000 # 连接超时(单位毫秒)
+  session:
+    timeout: 120 # session超时(单位秒)
+  ssl: # 签名证书
+    key-store: classpath:cert/room-local.p12
+    key-store-password: Dten111
+    key-store-type: PKCS12
+
+http: # http端口号
+  port: 8090
+
+#============================================================================
+# netty socket io setting
+#============================================================================
+# host在本地测试可以设置为localhost或者本机IP，在Linux服务器跑可换成服务器IP
+socketio:
+  host: 0.0.0.0
+  port: 9660
+  # 设置最大每帧处理数据的长度，防止他人利用大数据来攻击服务器
+  maxFramePayloadLength: 1048576
+  # 设置http交互最大内容长度
+  maxHttpContentLength: 1048576
+  # socket连接数大小（如只监听一个端口boss线程组为1即可）
+  bossCount: 1
+  workCount: 100
+  allowCustomRequests: true
+  # 协议升级超时时间（毫秒），默认10秒。HTTP握手升级为WS协议超时时间
+  upgradeTimeout: 10000
+  # Ping消息超时时间（毫秒），默认60秒，这个时间间隔内没有接收到心跳消息就会发送超时事件
+  pingTimeout: 30000
+  # Ping消息间隔（毫秒），默认25秒。客户端向服务器发送一条心跳消息间隔
+  pingInterval: 10000
+  keyStore: /cert/room-local.jks  # health.dten.dev(18.162.113.79, 9660)
+  keyStorePassword: Dten111

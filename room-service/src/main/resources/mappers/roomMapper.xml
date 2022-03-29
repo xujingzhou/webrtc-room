@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* @Creator: Johnny Xu
+* @Date: 2021/7/30
+* @Description:
+-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dten.healthcare.room.mapper.RoomMapper">
+
+    <resultMap id="extraMap" type="com.dten.healthcare.room.bean.ExtraDO" >
+        <result property="roomId" column="room_id" />
+        <result property="userId" column="user_id" />
+        <result property="broadcastId" column="broadcast_id" />
+        <result property="userFullName" column="user_fullName" />
+        <result property="roomOwner" column="room_owner" />
+    </resultMap>
+
+    <resultMap id="typeOfStreamsMap" type="com.dten.healthcare.room.bean.TypeOfStreamsDO" >
+        <result property="roomId" column="room_id" />
+        <result property="userId" column="user_id" />
+        <result property="offerToReceiveAudio" column="offer_to_receive_audio" />
+        <result property="offerToReceiveVideo" column="offer_to_receive_video" />
+        <result property="audio" column="audio" />
+        <result property="video" column="video" />
+        <result property="screen" column="screen" />
+        <result property="oneway" column="oneway" />
+        <result property="broadcast" column="broadcast" />
+        <result property="scalable" column="scalable" />
+    </resultMap>
+
+    <resultMap id="roomMap" type="com.dten.healthcare.room.bean.RoomDO">
+        <result property="roomId" column="room_id" />
+        <result property="roomName" column="room_name" />
+        <result property="maxParticipantsAllowed" column="max_participants_Allowed" />
+        <result property="owner" column="owner" />
+        <result property="identifier" column="identifier" />
+        <result property="videoSourceType" column="video_source_type" />
+        <association property="session" javaType="com.dten.healthcare.room.bean.TypeOfStreamsDO" resultMap="typeOfStreamsMap"/>
+        <association property="extra" javaType="com.dten.healthcare.room.bean.ExtraDO" resultMap="extraMap"/>
+        <collection property="participants" ofType="String">
+            <id property="participants" column="participant" />
+        </collection>
+    </resultMap>
+
+    <select id="getRoomByRoomId" parameterType="String" resultMap="roomMap">
+        SELECT
+            room.id,
+            room.room_id,
+            room.room_name,
+            room.max_participants_Allowed,
+            room.owner,
+            room.identifier,
+            room.participant,
+            room.video_source_type,
+            streams.id,
+            streams.room_id,
+            streams.user_id,
+            streams.offer_to_receive_audio,
+            streams.offer_to_receive_video,
+            streams.audio,
+            streams.video,
+            streams.screen,
+            streams.oneway,
+            streams.broadcast,
+            streams.scalable,
+            extra.id,
+            extra.room_id,
+            extra.user_id,
+            extra.broadcast_id,
+            extra.user_fullName,
+            extra.room_owner
+        FROM rm_room room
+        LEFT JOIN rm_extra extra ON room.room_id = extra.room_id
+        LEFT JOIN rm_type_of_streams streams ON room.room_id = streams.room_id
+        WHERE room.room_id = #{roomId}
+    </select>
+
+    <select id="getRoomByParticipant" parameterType="String" resultType="com.dten.healthcare.room.bean.RoomDO">
+        SELECT
+            id,
+            room_id,
+            room_name,
+            max_participants_Allowed,
+            owner,
+            identifier,
+            participant,
+            video_source_type
+        FROM rm_room
+        WHERE room_id = #{roomId} AND participant = #{participant}
+    </select>
+
+    <update id="update" parameterType="com.dten.healthcare.room.bean.RoomDO">
+        <choose>
+            <when test="room.participants.size() > 0">
+                <foreach collection="room.participants" item="participant" index = "index" separator=";">
+                    UPDATE rm_room as a,
+                    (SELECT
+                        id
+                    FROM rm_room
+                    WHERE room_id = #{room.roomId} AND participant = #{participant}) as b
+                    <trim prefix="set" suffixOverrides=",">
+                        <if test="room.roomId != null">room_id=#{room.roomId},</if>
+                        <if test="room.roomName != null">room_name=#{room.roomName},</if>
+                        <if test="room.maxParticipantsAllowed >= 0">max_participants_Allowed=#{room.maxParticipantsAllowed},</if>
+                        <if test="room.owner != null">owner=#{room.owner},</if>
+                        <if test="room.identifier != null">identifier=#{room.identifier},</if>
+                        <if test="room.participant != null">participant=#{room.participant},</if>
+                        <if test="room.videoSourceType != null">video_source_type=#{room.videoSourceType},</if>
+                    </trim>
+                    WHERE a.id = b.id
+                </foreach>
+            </when>
+            <otherwise>
+                UPDATE rm_room
+                <trim prefix="set" suffixOverrides=",">
+                    <if test="room.roomId != null">room_id=#{room.roomId},</if>
+                    <if test="room.roomName != null">room_name=#{room.roomName},</if>
+                    <if test="room.maxParticipantsAllowed >= 0">max_participants_Allowed=#{room.maxParticipantsAllowed},</if>
+                    <if test="room.owner != null">owner=#{room.owner},</if>
+                    <if test="room.identifier != null">identifier=#{room.identifier},</if>
+                    <if test="room.participant != null">participant=#{room.participant},</if>
+                    <if test="room.videoSourceType != null">video_source_type=#{room.videoSourceType},</if>
+                </trim>
+                WHERE room_id = #{room.roomId}
+<!--                WHERE id = #{room.id}-->
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateRoom" parameterType="com.dten.healthcare.room.bean.RoomDO">
+        UPDATE rm_room as a,
+            (SELECT
+                id
+            FROM rm_room
+            WHERE room_id = #{room.roomId} AND participant = #{participant}) as b
+        <trim prefix="set" suffixOverrides=",">
+            <if test="room.roomId != null">room_id=#{room.roomId},</if>
+            <if test="room.roomName != null">room_name=#{room.roomName},</if>
+            <if test="room.maxParticipantsAllowed >= 0">max_participants_Allowed=#{room.maxParticipantsAllowed},</if>
+            <if test="room.owner != null">owner=#{room.owner},</if>
+            <if test="room.identifier != null">identifier=#{room.identifier},</if>
+            <if test="room.participant != null">participant=#{room.participant},</if>
+            <if test="room.videoSourceType != null">video_source_type=#{room.videoSourceType},</if>
+        </trim>
+        WHERE a.id = b.id
+    </update>
+
+    <update id="updateExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        UPDATE rm_extra
+        <trim prefix="set" suffixOverrides=",">
+            <if test="extra.roomId != null">room_id=#{extra.roomId},</if>
+            <if test="extra.userId != null">user_id=#{extra.userId},</if>
+            <if test="extra.broadcastId != null">broadcast_id=#{extra.broadcastId},</if>
+            <if test="extra.userFullName != null">user_fullName=#{extra.userFullName},</if>
+            room_owner=#{extra.roomOwner},
+        </trim>
+        WHERE room_id = #{extra.roomId}
+    </update>
+
+    <update id="updateStreams" parameterType="com.dten.healthcare.room.bean.TypeOfStreamsDO">
+        UPDATE rm_type_of_streams
+        <trim prefix="set" suffixOverrides=",">
+            <if test="streams.roomId != null">room_id=#{streams.roomId},</if>
+            <if test="streams.userId != null">user_id=#{streams.userId},</if>
+            offer_to_receive_audio=#{streams.offerToReceiveAudio},
+            offer_to_receive_video=#{streams.offerToReceiveVideo},
+            audio=#{streams.audio},
+            video=#{streams.video},
+            screen=#{streams.screen},
+            oneway=#{streams.oneway},
+            broadcast=#{streams.broadcast},
+            scalable=#{streams.scalable},
+        </trim>
+        WHERE room_id = #{streams.roomId}
+    </update>
+
+    <insert id="insertRoom" parameterType="com.dten.healthcare.room.bean.RoomDO">
+        INSERT INTO
+            rm_room(id, room_id, room_name, max_participants_Allowed, owner, identifier, participant, video_source_type)
+        VALUES
+            <foreach collection="room.participants" item="participant" separator=",">
+                ( #{room.id}, #{room.roomId}, #{room.roomName}, #{room.maxParticipantsAllowed},
+                #{room.owner}, #{room.identifier}, #{participant}, #{room.videoSourceType} )
+            </foreach>
+    </insert>
+
+    <insert id="insertExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        INSERT INTO
+            rm_extra(id, room_id, user_id, broadcast_id, user_fullName, room_owner)
+        VALUES
+            ( #{extra.id}, #{extra.roomId}, #{extra.userId}, #{extra.broadcastId},
+            #{extra.userFullName}, #{extra.roomOwner} )
+    </insert>
+
+    <insert id="insertStreams" parameterType="com.dten.healthcare.room.bean.TypeOfStreamsDO">
+        INSERT INTO
+            rm_type_of_streams(id, room_id, offer_to_receive_audio, offer_to_receive_video,
+                audio, video, screen, oneway, broadcast, scalable)
+        VALUES
+            ( #{streams.id}, #{streams.roomId}, #{streams.offerToReceiveAudio}, #{streams.offerToReceiveVideo},
+             #{streams.audio}, #{streams.video}, #{streams.screen}, #{streams.oneway}, #{streams.broadcast},
+             #{streams.scalable} )
+    </insert>
+
+    <insert id="insertOrUpdateRoom" parameterType="com.dten.healthcare.room.bean.RoomDO">
+        REPLACE INTO
+            rm_room(id, room_id, room_name, max_participants_Allowed, owner, identifier, participant, video_source_type)
+        VALUES
+            <foreach collection="room.participants" item="participant" separator=",">
+                ( #{room.id}, #{room.roomId}, #{room.roomName}, #{room.maxParticipantsAllowed},
+                #{room.owner}, #{room.identifier}, #{participant}, #{room.videoSourceType} )
+            </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateExtra" parameterType="com.dten.healthcare.room.bean.ExtraDO">
+        REPLACE INTO
+            rm_extra(id, room_id, user_id, broadcast_id, user_fullName, room_owner)
+        VALUES
+            ( #{extra.id}, #{extra.roomId}, #{extra.userId}, #{extra.broadcastId},
+            #{extra.userFullName}, #{extra.roomOwner} )
+    </insert>
+
+    <insert id="insertOrUpdateStreams" parameterType="com.dten.healthcare.room.bean.TypeOfStreamsDO">
+        REPLACE INTO
+            rm_type_of_streams(id, room_id, offer_to_receive_audio, offer_to_receive_video,
+            audio, video, screen, oneway, broadcast, scalable)
+        VALUES
+            ( #{streams.id}, #{streams.roomId}, #{streams.offerToReceiveAudio}, #{streams.offerToReceiveVideo},
+            #{streams.audio}, #{streams.video}, #{streams.screen}, #{streams.oneway}, #{streams.broadcast},
+            #{streams.scalable} )
+    </insert>
+
+    <delete id="deleteByRoomId" parameterType="String">
+        DELETE
+            room, extra, streams
+        FROM rm_room room
+        LEFT JOIN rm_extra extra ON room.room_id = extra.room_id
+        LEFT JOIN rm_type_of_streams streams ON room.room_id = streams.room_id
+        WHERE room.room_id = #{roomId}
+    </delete>
+
+</mapper>
